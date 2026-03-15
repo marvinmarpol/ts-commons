@@ -132,9 +132,11 @@ describe('maskPIIInObject (legacy — piiFields)', () => {
 
   describe('when the object contains nested objects and arrays', () => {
     it('should recurse into nested objects', () => {
-      const obj = { user: { full_name: 'Nested Name' } };
+      const obj = { user: { full_name: 'Nested Name', nested:{date_of_birth: 30091992, inner:{date_of_birth: "30091992"}} } };
       const result = maskPIIInObject(obj);
       expect(result.user.full_name).toBe('Nes*****ame');
+      expect(result.user.nested.date_of_birth).toBe('3009****');
+      expect(result.user.nested.inner.date_of_birth).toBe('3009****');
     });
 
     it('should recurse into arrays', () => {

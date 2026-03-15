@@ -5,8 +5,8 @@
 
 const DEFAULT_VISIBLE_START = 3;
 const DEFAULT_VISIBLE_END = 3;
-const DEFAULT_MASK_CHAR = '*';
-const DEFAULT_REDACT_PLACEHOLDER = '[REDACTED]';
+const DEFAULT_MASK_CHAR = "*";
+const DEFAULT_REDACT_PLACEHOLDER = "[REDACTED]";
 const SHORT_STRING_MAX_LENGTH = 5;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ const SHORT_STRING_MAX_LENGTH = 5;
  * - `redact` — replace the entire value with a placeholder string
  * - `hash`   — replace with a SHA-256 hex digest (non-reversible, Node.js only)
  */
-export type PIIStrategy = 'mask' | 'redact' | 'hash';
+export type PIIStrategy = "mask" | "redact" | "hash";
 
 /**
  * Sensitivity level from the company PII Data Classification policy.
@@ -29,7 +29,7 @@ export type PIIStrategy = 'mask' | 'redact' | 'hash';
  * - `P1` — Data owner can see the data (email, phone, name, bank account, …)
  * - `P2` — Data owner and data client can see (occupation, education, marital status)
  */
-export type PIILevel = 'P0' | 'P1' | 'P2';
+export type PIILevel = "P0" | "P1" | "P2";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Interfaces
@@ -145,24 +145,24 @@ export interface MaskPIIInObjectOptions {
  * @deprecated Use {@link DEFAULT_PII_FIELD_DEFINITIONS} which includes level and strategy metadata.
  */
 export const DEFAULT_PII_FIELDS = new Set([
-  'nik',
-  'full_name',
-  'alias',
-  'email',
-  'phone',
-  'phone_number',
-  'mobile_number',
-  'account_number',
-  'card_number',
-  'id_number',
-  'document_id',
-  'date_of_birth',
-  'place_of_birth',
-  'nationality',
-  'address',
-  'postal_code',
-  'latitude',
-  'longitude',
+  "nik",
+  "full_name",
+  "alias",
+  "email",
+  "phone",
+  "phone_number",
+  "mobile_number",
+  "account_number",
+  "card_number",
+  "id_number",
+  "document_id",
+  "date_of_birth",
+  "place_of_birth",
+  "nationality",
+  "address",
+  "postal_code",
+  "latitude",
+  "longitude",
 ]);
 
 /**
@@ -171,64 +171,175 @@ export const DEFAULT_PII_FIELDS = new Set([
  *
  * Override individual entries at call-site via `MaskPIIInObjectOptions.fieldDefinitions`.
  */
-export const DEFAULT_PII_FIELD_DEFINITIONS: Record<string, PIIFieldDefinition> = {
-  // ── P0 — redact entirely (only the data owner may see) ──────────────────────
-  nik:                         { level: 'P0', strategy: 'redact' },
-  national_id:                 { level: 'P0', strategy: 'redact' },
-  passport_number:             { level: 'P0', strategy: 'redact' },
-  kk_number:                   { level: 'P0', strategy: 'redact' },
-  family_card_number:          { level: 'P0', strategy: 'redact' },
-  medical_record:              { level: 'P0', strategy: 'redact' },
-  parent_nik:                  { level: 'P0', strategy: 'redact' },
-  marriage_certificate:        { level: 'P0', strategy: 'redact' },
-  marriage_certificate_number: { level: 'P0', strategy: 'redact' },
-  divorce_certificate:         { level: 'P0', strategy: 'redact' },
-  divorce_certificate_number:  { level: 'P0', strategy: 'redact' },
-  iris_scan:                   { level: 'P0', strategy: 'redact' },
-  password:                    { level: 'P0', strategy: 'redact' },
-  pin:                         { level: 'P0', strategy: 'redact' },
-  birth_certificate:           { level: 'P0', strategy: 'redact' },
-  birth_certificate_number:    { level: 'P0', strategy: 'redact' },
-  npwp:                        { level: 'P0', strategy: 'redact' },
-  otp:                         { level: 'P0', strategy: 'redact' },
+export const DEFAULT_PII_FIELD_DEFINITIONS: Record<string, PIIFieldDefinition> =
+  {
+    // ── P0 — redact entirely (only the data owner may see) ──────────────────────
+    nik: { level: "P0", strategy: "redact" },
+    national_id: { level: "P0", strategy: "redact" },
+    passport_number: { level: "P0", strategy: "redact" },
+    kk_number: { level: "P0", strategy: "redact" },
+    family_card_number: { level: "P0", strategy: "redact" },
+    medical_record: { level: "P0", strategy: "redact" },
+    parent_nik: { level: "P0", strategy: "redact" },
+    marriage_certificate: { level: "P0", strategy: "redact" },
+    marriage_certificate_number: { level: "P0", strategy: "redact" },
+    divorce_certificate: { level: "P0", strategy: "redact" },
+    divorce_certificate_number: { level: "P0", strategy: "redact" },
+    iris_scan: { level: "P0", strategy: "redact" },
+    password: { level: "P0", strategy: "redact" },
+    pin: { level: "P0", strategy: "redact" },
+    birth_certificate: { level: "P0", strategy: "redact" },
+    birth_certificate_number: { level: "P0", strategy: "redact" },
+    npwp: { level: "P0", strategy: "redact" },
+    otp: { level: "P0", strategy: "redact" },
 
-  // ── P1 — partially masked (data owner may see) ───────────────────────────────
-  phone:               { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 2 },
-  phone_number:        { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 2 },
-  mobile_number:       { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 2 },
-  religion:            { level: 'P1', strategy: 'redact' },
-  mother_maiden_name:  { level: 'P1', strategy: 'mask', visibleStart: 1, visibleEnd: 0 },
-  salary:              { level: 'P1', strategy: 'redact' },
-  date_of_birth:       { level: 'P1', strategy: 'mask', visibleStart: 4, visibleEnd: 0 },
-  place_of_birth:      { level: 'P1', strategy: 'mask', visibleStart: 2, visibleEnd: 0 },
-  email:               { level: 'P1', strategy: 'mask' },
-  fingerprint:         { level: 'P1', strategy: 'redact' },
-  address:             { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 0 },
-  residential_address: { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 0 },
-  signature:           { level: 'P1', strategy: 'redact' },
-  full_name:           { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 3 },
-  alias:               { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 3 },
-  name:                { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 3 },
-  account_number:      { level: 'P1', strategy: 'mask', visibleStart: 0, visibleEnd: 4 },
-  card_number:         { level: 'P1', strategy: 'mask', visibleStart: 0, visibleEnd: 4 },
-  id_number:           { level: 'P1', strategy: 'mask', visibleStart: 2, visibleEnd: 2 },
-  document_id:         { level: 'P1', strategy: 'mask', visibleStart: 2, visibleEnd: 2 },
-  bank_account:        { level: 'P1', strategy: 'mask', visibleStart: 0, visibleEnd: 4 },
-  bank_account_number: { level: 'P1', strategy: 'mask', visibleStart: 0, visibleEnd: 4 },
-  card_expiry:         { level: 'P1', strategy: 'mask', visibleStart: 0, visibleEnd: 2 },
-  card_expiry_date:    { level: 'P1', strategy: 'mask', visibleStart: 0, visibleEnd: 2 },
-  nationality:         { level: 'P1', strategy: 'mask', visibleStart: 2, visibleEnd: 0 },
-  postal_code:         { level: 'P1', strategy: 'mask', visibleStart: 2, visibleEnd: 0 },
-  latitude:            { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 0 },
-  longitude:           { level: 'P1', strategy: 'mask', visibleStart: 3, visibleEnd: 0 },
+    // ── P1 — partially masked (data owner may see) ───────────────────────────────
+    phone: { level: "P1", strategy: "mask", visibleStart: 3, visibleEnd: 2 },
+    phone_number: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 2,
+    },
+    mobile_number: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 2,
+    },
+    religion: { level: "P1", strategy: "redact" },
+    mother_maiden_name: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 1,
+      visibleEnd: 0,
+    },
+    salary: { level: "P1", strategy: "redact" },
+    date_of_birth: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 4,
+      visibleEnd: 0,
+    },
+    place_of_birth: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 2,
+      visibleEnd: 0,
+    },
+    email: { level: "P1", strategy: "mask" },
+    fingerprint: { level: "P1", strategy: "redact" },
+    address: { level: "P1", strategy: "mask", visibleStart: 3, visibleEnd: 0 },
+    residential_address: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 0,
+    },
+    signature: { level: "P1", strategy: "redact" },
+    full_name: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 3,
+    },
+    alias: { level: "P1", strategy: "mask", visibleStart: 3, visibleEnd: 3 },
+    name: { level: "P1", strategy: "mask", visibleStart: 3, visibleEnd: 3 },
+    account_number: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 0,
+      visibleEnd: 4,
+    },
+    card_number: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 0,
+      visibleEnd: 4,
+    },
+    id_number: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 2,
+      visibleEnd: 2,
+    },
+    document_id: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 2,
+      visibleEnd: 2,
+    },
+    bank_account: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 0,
+      visibleEnd: 4,
+    },
+    bank_account_number: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 0,
+      visibleEnd: 4,
+    },
+    card_expiry: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 0,
+      visibleEnd: 2,
+    },
+    card_expiry_date: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 0,
+      visibleEnd: 2,
+    },
+    nationality: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 2,
+      visibleEnd: 0,
+    },
+    postal_code: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 2,
+      visibleEnd: 0,
+    },
+    latitude: { level: "P1", strategy: "mask", visibleStart: 3, visibleEnd: 0 },
+    longitude: {
+      level: "P1",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 0,
+    },
 
-  // ── P2 — lightly masked (data owner and data client may see) ────────────────
-  occupation:              { level: 'P2', strategy: 'mask', visibleStart: 3, visibleEnd: 2 },
-  job:                     { level: 'P2', strategy: 'mask', visibleStart: 3, visibleEnd: 2 },
-  education:               { level: 'P2', strategy: 'mask', visibleStart: 3, visibleEnd: 2 },
-  education_qualification: { level: 'P2', strategy: 'mask', visibleStart: 3, visibleEnd: 2 },
-  marital_status:          { level: 'P2', strategy: 'mask', visibleStart: 1, visibleEnd: 1 },
-};
+    // ── P2 — lightly masked (data owner and data client may see) ────────────────
+    occupation: {
+      level: "P2",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 2,
+    },
+    job: { level: "P2", strategy: "mask", visibleStart: 3, visibleEnd: 2 },
+    education: {
+      level: "P2",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 2,
+    },
+    education_qualification: {
+      level: "P2",
+      strategy: "mask",
+      visibleStart: 3,
+      visibleEnd: 2,
+    },
+    marital_status: {
+      level: "P2",
+      strategy: "mask",
+      visibleStart: 1,
+      visibleEnd: 1,
+    },
+  };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public transformation functions
@@ -248,13 +359,13 @@ export const DEFAULT_PII_FIELD_DEFINITIONS: Record<string, PIIFieldDefinition> =
  * maskPII('Hi')                                    // 'H*'
  */
 export function maskPII(value: string, options: MaskPIIOptions = {}): string {
-  if (value == null || typeof value !== 'string') return value;
+  if (value == null || typeof value !== "string") return value;
   const trimmed = value.trim();
   if (!trimmed.length) return value;
 
   const visibleStart = options.visibleStart ?? DEFAULT_VISIBLE_START;
-  const visibleEnd   = options.visibleEnd   ?? DEFAULT_VISIBLE_END;
-  const maskChar     = options.maskChar     ?? DEFAULT_MASK_CHAR;
+  const visibleEnd = options.visibleEnd ?? DEFAULT_VISIBLE_END;
+  const maskChar = options.maskChar ?? DEFAULT_MASK_CHAR;
 
   if (trimmed.length <= SHORT_STRING_MAX_LENGTH) {
     return trimmed.length > 1
@@ -267,8 +378,8 @@ export function maskPII(value: string, options: MaskPIIOptions = {}): string {
     return maskChar.repeat(trimmed.length);
   }
 
-  const start       = trimmed.substring(0, visibleStart);
-  const end         = trimmed.substring(trimmed.length - visibleEnd);
+  const start = trimmed.substring(0, visibleStart);
+  const end = trimmed.substring(trimmed.length - visibleEnd);
   const maskedLength = Math.max(1, trimmed.length - totalVisible);
   return `${start}${maskChar.repeat(maskedLength)}${end}`;
 }
@@ -296,8 +407,12 @@ export function redactPII(placeholder = DEFAULT_REDACT_PLACEHOLDER): string {
  */
 export function hashPII(value: string): string {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { createHash } = require('crypto') as typeof import('crypto');
-  return createHash('sha256').update(value).digest('hex');
+  try {
+    const { createHash } = require("crypto") as typeof import("crypto");
+    return createHash("sha256").update(value).digest("hex");
+  } catch (err) {
+    throw new Error("crypto module unavailable");
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -305,10 +420,10 @@ export function hashPII(value: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function normalizeFieldKey(key: string): string {
-  return key.toLowerCase().replace(/\s+/g, '_');
+  return key.toLowerCase().replace(/\s+/g, "_");
 }
 
-const LEVEL_ORDER: PIILevel[] = ['P0', 'P1', 'P2'];
+const LEVEL_ORDER: readonly PIILevel[] = ["P0", "P1", "P2"];
 
 function meetsMinLevel(fieldLevel: PIILevel, minLevel: PIILevel): boolean {
   return LEVEL_ORDER.indexOf(fieldLevel) <= LEVEL_ORDER.indexOf(minLevel);
@@ -333,10 +448,19 @@ function resolveFieldDefinition(
   normalizedKey: string,
   options: MaskPIIInObjectOptions,
 ): PIIFieldDefinition | undefined {
-  const base     = DEFAULT_PII_FIELD_DEFINITIONS[normalizedKey];
+  const base = DEFAULT_PII_FIELD_DEFINITIONS[normalizedKey];
   const override = options.fieldDefinitions?.[normalizedKey];
   if (!base && !override) return undefined;
-  return { ...base, ...override } as PIIFieldDefinition;
+  
+  const resolved = { ...base, ...override };
+
+  // Guard: a valid definition must have both level and strategy.
+  // If either is missing (e.g. caller passed a partial override for
+  // an unknown field), treat it as unrecognised rather than silently
+  // falling through with broken behaviour.
+  if (!resolved.level || !resolved.strategy) return undefined;
+
+  return resolved as PIIFieldDefinition;
 }
 
 function applyStrategy(
@@ -344,25 +468,30 @@ function applyStrategy(
   def: PIIFieldDefinition,
   options: MaskPIIInObjectOptions,
 ): string {
-  const callerMask    = options.maskOptions ?? {};
-  const globalHolder  = options.placeholder ?? DEFAULT_REDACT_PLACEHOLDER;
+  const callerMask = options.maskOptions ?? {};
+  const globalHolder = options.placeholder ?? DEFAULT_REDACT_PLACEHOLDER;
 
   switch (def.strategy) {
-    case 'redact':
+    case "redact":
       return redactPII(def.placeholder ?? globalHolder);
 
-    case 'hash':
+    case "hash":
       return hashPII(value);
 
-    case 'mask':
-    default:
-      // maskOptions (caller intent) takes precedence over per-field registry defaults
+    case "mask":
       return maskPII(value, {
         visibleStart: callerMask.visibleStart ?? def.visibleStart,
-        visibleEnd:   callerMask.visibleEnd   ?? def.visibleEnd,
-        maskChar:     callerMask.maskChar     ?? def.maskChar,
+        visibleEnd: callerMask.visibleEnd ?? def.visibleEnd,
+        maskChar: callerMask.maskChar ?? def.maskChar,
       });
+
+    default:
+      return value;
   }
+}
+
+function isMaskable(value: unknown): value is string | number {
+  return typeof value === "string" || typeof value === "number";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -402,8 +531,11 @@ function applyStrategy(
  * maskPIIInObject({ email: 'a@b.com' }, { piiFields: ['email'] })
  * // → { email: 'a@b***com' }
  */
-export function maskPIIInObject<T>(obj: T, options: MaskPIIInObjectOptions = {}): T {
-  if (obj == null || typeof obj !== 'object') return obj;
+export function maskPIIInObject<T>(
+  obj: T,
+  options: MaskPIIInObjectOptions = {},
+): T {
+  if (obj == null || typeof obj !== "object") return obj;
 
   if (Array.isArray(obj)) {
     return obj.map((item) => maskPIIInObject(item, options)) as T;
@@ -414,15 +546,22 @@ export function maskPIIInObject<T>(obj: T, options: MaskPIIInObjectOptions = {})
   // Preserves the original flat-mask behaviour exactly.
   if (options.piiFields) {
     const legacyFields = buildLegacyFieldSet(options);
-    const maskOptions  = options.maskOptions ?? {};
+    const maskOptions = options.maskOptions ?? {};
     const result: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       const normalizedKey = normalizeFieldKey(key);
-      if (legacyFields.has(normalizedKey) && typeof value === 'string' && value.length > 0) {
+      if (
+        legacyFields.has(normalizedKey) &&
+        typeof value === "string" &&
+        value.length > 0
+      ) {
         result[key] = maskPII(value, maskOptions);
-      } else if (typeof value === 'object' && value !== null) {
-        result[key] = maskPIIInObject(value as Record<string, unknown>, options);
+      } else if (typeof value === "object" && value !== null) {
+        result[key] = maskPIIInObject(
+          value as Record<string, unknown>,
+          options,
+        );
       } else {
         result[key] = value;
       }
@@ -433,7 +572,7 @@ export function maskPIIInObject<T>(obj: T, options: MaskPIIInObjectOptions = {})
 
   // ── Default path ─────────────────────────────────────────────────────────────
   // Uses DEFAULT_PII_FIELD_DEFINITIONS merged with any caller-supplied fieldDefinitions.
-  const minLevel = options.minLevel ?? 'P2';
+  const minLevel = options.minLevel ?? "P2";
   const legacyFallbackFields = buildLegacyFieldSet(options);
   const result: Record<string, unknown> = {};
 
@@ -446,12 +585,14 @@ export function maskPIIInObject<T>(obj: T, options: MaskPIIInObjectOptions = {})
       ? meetsMinLevel(def.level, minLevel)
       : legacyFallbackFields.has(normalizedKey);
 
-    if (shouldProcess && typeof value === 'string' && value.length > 0) {
-      result[key] = def
-        ? applyStrategy(value, def, options)
-        // Field is in the legacy fallback set but has no definition — use maskPII
-        : maskPII(value, options.maskOptions ?? {});
-    } else if (typeof value === 'object' && value !== null) {
+    if (shouldProcess && isMaskable(value)) {
+      const candidate = typeof value === "number" ? String(value) : value;
+      if (candidate.length > 0) {
+        result[key] = def
+          ? applyStrategy(candidate, def, options)
+          : maskPII(candidate, options.maskOptions ?? {});
+      }
+    } else if (typeof value === "object" && value !== null) {
       result[key] = maskPIIInObject(value as Record<string, unknown>, options);
     } else {
       result[key] = value;
